@@ -4,33 +4,52 @@ import javax.swing.SwingUtilities;
 import quick.dbtable.DBTable;
 
 import javax.swing.JTextArea;
-import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.Vector;
-
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 
 public class Admin extends JFrame {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private DBTable table;
 	private JTextArea textArea;
-	private JList listTablas, listAtributos;
+	private JList<String> listTablas, listAtributos;
 	private JButton btnEjecutar, btnBorrar;
 	private JLabel lblTablas;
 
 	public Admin(DBTable t) {
 		table = t;
+
+		listAtributos = new JList<String>();
+		listTablas = new JList<String>();
+
+		listTablas.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+
 		listarTablas();
+
+		MouseListener mouseListener = new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				listarAtributos(listTablas.getSelectedValue());
+			}
+		};
+		listTablas.addMouseListener(mouseListener);
+
 		getContentPane().setLayout(null);
 
 		textArea = new JTextArea();
@@ -56,7 +75,6 @@ public class Admin extends JFrame {
 		btnBorrar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				textArea.setText("");
-				listarAtributos();
 			}
 		});
 
@@ -71,68 +89,64 @@ public class Admin extends JFrame {
 	}
 
 	private void listarTablas() {
-		DefaultListModel<String> listModel = new DefaultListModel();
+		DefaultListModel<String> listModel = new DefaultListModel<String>();
+		Connection c = table.getConnection();
 		try {
-			table.setSelectSql("show tables");
-			table.createColumnModelFromQuery();
-			table.refresh();
-			Vector v = table.getDataVector();
-			for (int i = 0; i < v.size(); i++) {
-				listModel.addElement(v.get(i).toString());
+			Statement st = c.createStatement();
+			ResultSet rs = st.executeQuery("show tables");
+			boolean fin = rs.next();
+			while (fin) {
+				listModel.addElement(rs.getString("Tables_in_parquimetros"));
+				fin = rs.next();
 			}
-			listTablas = new JList(listModel);
+			listTablas.setModel(listModel);
 			listTablas.setBounds(622, 100, 162, 272);
 			getContentPane().add(listTablas);
+			rs.close();
+			st.close();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void listarAtributos(String selected) {
+		DefaultListModel<String> listModel = new DefaultListModel<String>();
+		Connection c = table.getConnection();
+		try {
+			Statement st = c.createStatement();
+			ResultSet rs = st.executeQuery("describe " + selected);
+			boolean fin = rs.next();
+			while (fin) {
+				listModel.addElement(rs.getString("Field"));
+				fin = rs.next();
+			}
+			listAtributos.setModel(listModel);
+			listAtributos.setBounds(804, 100, 162, 272);
+			getContentPane().add(listAtributos);
+			rs.close();
+			st.close();
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 
 		}
 	}
 
-	private void listarAtributos() {
-		ListModel<String> listModel;
-		DefaultListModel<String> nueva = new DefaultListModel();
-		try {
-			int i = listTablas.getSelectedIndex();
-			listModel = listTablas.getModel();
-			String selected = listModel.getElementAt(i).toString();
-			selected = selected.replaceAll("[^a-z,_]", "");
-			table.setSelectSql("describe" + selected);
-			table.createColumnModelFromQuery();
-			table.refresh();
-			Vector v = table.getDataVector();
-			for (int j = 0; j < v.size(); j++) {
-				nueva.addElement(v.get(j).toString());
-			}
-
-			listAtributos = new JList(nueva);
-			System.out.println("Supuestamente creé la lista");
-			listAtributos.setBounds(804, 100, 162, 272);
-			getContentPane().add(listAtributos);
-
-		} catch (SQLException e) {
-
-		}
-	}
-
-	private void desconectarBD() {
-		try {
-			table.close();
-		} catch (SQLException ex) {
-			System.out.println("SQLException: " + ex.getMessage());
-			System.out.println("SQLState: " + ex.getSQLState());
-			System.out.println("VendorError: " + ex.getErrorCode());
-		}
-
-	}
+	/*
+	 * private void desconectarBD() { try { table.close(); } catch (SQLException ex)
+	 * { System.out.println("SQLException: " + ex.getMessage());
+	 * System.out.println("SQLState: " + ex.getSQLState());
+	 * System.out.println("VendorError: " + ex.getErrorCode()); }
+	 * 
+	 * }
+	 */
 
 	private void refrescarTabla() {
 		try {
 			table.setSelectSql(this.textArea.getText().trim());
-
 			table.createColumnModelFromQuery();
 			for (int i = 0; i < table.getColumnCount(); i++) {
-
 				if (table.getColumn(i).getType() == Types.TIME) {
 					table.getColumn(i).setType(Types.CHAR);
 				}
