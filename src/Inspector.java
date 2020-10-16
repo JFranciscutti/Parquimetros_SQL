@@ -1,6 +1,10 @@
 import javax.swing.JFrame;
 
 import quick.dbtable.DBTable;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+
+import java.awt.BorderLayout;
 
 public class Inspector extends JFrame {
 
