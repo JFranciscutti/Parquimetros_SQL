@@ -36,6 +36,7 @@ public class Login extends JFrame {
 	private Admin adm;
 	private Inspector ins;
 	public DBTable table;
+	private String[] datos;
 
 	public static void main(String args[]) {
 		SwingUtilities.invokeLater(new Runnable() {
@@ -165,9 +166,14 @@ public class Login extends JFrame {
 		Connection c = table.getConnection();
 		try {
 			Statement st = c.createStatement();
-			ResultSet rs = st.executeQuery(
-					"select * from inspectores where legajo='" + user + "' and password=md5('" + pw + "')");
+			ResultSet rs = st.executeQuery("select nombre,apellido from inspectores where legajo='" + user
+					+ "' and password=md5('" + pw + "')");
 			salida = rs.next();
+
+			datos = new String[2];
+			datos[0] = rs.getString("nombre");
+			datos[1] = rs.getString("Apellido");
+
 			st.close();
 			rs.close();
 
@@ -181,6 +187,7 @@ public class Login extends JFrame {
 
 	private void adminScreen() {
 		adm = new Admin(table);
+		adm.setTitle("Bienvenido administrador - App Parquimetros");
 		adm.setSize(1000, 600);
 		adm.setVisible(true);
 		adm.setLocationRelativeTo(null);
@@ -190,6 +197,7 @@ public class Login extends JFrame {
 
 	private void inspecScreen() {
 		ins = new Inspector(table);
+		ins.setTitle("Bienvenido " + datos[0] + " " + datos[1] + " - App Parquimetros");
 		ins.setSize(1000, 600);
 		ins.setVisible(true);
 		ins.setLocationRelativeTo(null);
