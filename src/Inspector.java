@@ -20,6 +20,7 @@ import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JComboBox;
+import javax.swing.SwingConstants;
 
 public class Inspector extends JFrame {
 
@@ -78,7 +79,7 @@ public class Inspector extends JFrame {
 		getContentPane().add(btnSig);
 
 		list = new JList<String>();
-		list.setBounds(42, 193, 224, 305);
+		list.setBounds(42, 245, 224, 305);
 		getContentPane().add(list);
 
 		JLabel lblSeleccioneUbicacion = new JLabel("Seleccione ubicación");
@@ -110,6 +111,7 @@ public class Inspector extends JFrame {
 						fin = rs.next();
 					}
 					DefaultListModel<String> patentesInfractoras = patentesMulta(listaPatentes, estacionadas);
+
 					// ya tengo las patentes que no tienen estacionamientos abiertos, tamos listos
 					// para ver si el inspector puede meter mano o no
 					// if(puedeLabrar())
@@ -125,6 +127,12 @@ public class Inspector extends JFrame {
 
 		});
 		getContentPane().add(btnMulta);
+		
+		JLabel lblPatentes = new JLabel("Patentes");
+		lblPatentes.setHorizontalAlignment(SwingConstants.CENTER);
+		lblPatentes.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 22));
+		lblPatentes.setBounds(69, 184, 161, 74);
+		getContentPane().add(lblPatentes);
 		table = t;
 
 	}
