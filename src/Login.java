@@ -103,6 +103,11 @@ public class Login extends JFrame {
 		botones.add(btnAdmin);
 		botones.add(btnInspec);
 
+		JLabel lblNewLabel = new JLabel(
+				"Label temporal: \r\n\r\nlegajos: 118524 y 113603 \r\n\r\npasswords: bdd2020 (para ambos legajos)");
+		lblNewLabel.setBounds(23, 11, 531, 63);
+		getContentPane().add(lblNewLabel);
+
 		btnLogin.addActionListener(new ActionListener() {
 			@SuppressWarnings("deprecation")
 			public void actionPerformed(ActionEvent arg0) {
@@ -140,7 +145,7 @@ public class Login extends JFrame {
 			} else if (btnInspec.isSelected()) {
 				table.connectDatabase(driver, url, "inspector", "inspector");
 				if (checkInspector(user, pw))
-					inspecScreen();
+					inspecScreen(user);
 				else
 					JOptionPane.showMessageDialog(getContentPane(), "Legajo o contraseña incorrectos", "ERROR",
 							JOptionPane.WARNING_MESSAGE);
@@ -195,10 +200,10 @@ public class Login extends JFrame {
 		this.dispose();
 	}
 
-	private void inspecScreen() {
-		ins = new Inspector(table);
+	private void inspecScreen(String user) {
+		ins = new Inspector(table, user);
 		ins.setTitle("Bienvenido " + datos[0] + " " + datos[1] + " - App Parquimetros");
-		ins.setSize(1000, 600);
+		ins.setSize(800, 600);
 		ins.setVisible(true);
 		ins.setLocationRelativeTo(null);
 		ins.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
