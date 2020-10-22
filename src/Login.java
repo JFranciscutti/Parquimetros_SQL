@@ -172,7 +172,7 @@ public class Login extends JFrame {
 
 			datos = new String[2];
 			datos[0] = rs.getString("nombre");
-			datos[1] = rs.getString("Apellido");
+			datos[1] = rs.getString("apellido");
 
 			st.close();
 			rs.close();
