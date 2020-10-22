@@ -2,6 +2,8 @@ import javax.swing.JFrame;
 
 import quick.dbtable.DBTable;
 import javax.swing.JLabel;
+
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,6 +39,7 @@ public class Inspector extends JFrame {
 	private JButton btnMulta;
 
 	public Inspector(DBTable t, String l) {
+		table = t;
 		legajo = l;
 		listaPatentes = new DefaultListModel<String>();
 
@@ -114,8 +117,6 @@ public class Inspector extends JFrame {
 
 					// ya tengo las patentes que no tienen estacionamientos abiertos, tamos listos
 					// para ver si el inspector puede meter mano o no
-					// if(puedeLabrar())
-					// labrarMultas(patentesInfractoras)
 
 					rs.close();
 					st.close();
@@ -127,13 +128,12 @@ public class Inspector extends JFrame {
 
 		});
 		getContentPane().add(btnMulta);
-		
+
 		JLabel lblPatentes = new JLabel("Patentes");
 		lblPatentes.setHorizontalAlignment(SwingConstants.CENTER);
 		lblPatentes.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 22));
 		lblPatentes.setBounds(69, 184, 161, 74);
 		getContentPane().add(lblPatentes);
-		table = t;
 
 	}
 
@@ -187,5 +187,33 @@ public class Inspector extends JFrame {
 				return true;
 		}
 		return false;
+	}
+
+	// te muestra toda la data de la multa que se acaba de hacer. el tema es que
+	// antes de hacer esto, habria que hacer el insert de la multa en la bdd.
+	// ES SOLO UN BOSQUEJO
+	private void labrarMulta(String patente) {
+		Connection c = table.getConnection();
+		try {
+			Statement st = c.createStatement();
+			ResultSet rs = st.executeQuery(
+					"select numero as 'Numero de Multa',fecha,hora,calle,altura,patente,legajo from multa natural join asociado_con where patente = '"
+							+ patente + "'");
+			boolean fin = rs.next();
+			while (fin) {
+				System.out.println("Multa labrada:");
+				System.out.println("Nro de multa: " + rs.getInt("Numero de Multa"));
+				System.out.println("Fecha: " + rs.getDate("fecha"));
+				System.out.println("Hora: " + rs.getTime("hora"));
+				System.out.println("Calle: " + rs.getString("calle"));
+				System.out.println("Altura: " + rs.getInt("altura"));
+				System.out.println("Patente: " + rs.getString("patente"));
+				System.out.println("Legajo del inspector: " + rs.getString("legajo"));
+			}
+
+		} catch (SQLException e) {
+
+		}
+
 	}
 }

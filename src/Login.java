@@ -203,7 +203,7 @@ public class Login extends JFrame {
 	private void inspecScreen(String user) {
 		ins = new Inspector(table, user);
 		ins.setTitle("Bienvenido " + datos[0] + " " + datos[1] + " - App Parquimetros");
-		ins.setSize(800, 600);
+		ins.setSize(1000, 600);
 		ins.setVisible(true);
 		ins.setLocationRelativeTo(null);
 		ins.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
