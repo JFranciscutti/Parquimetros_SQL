@@ -3,7 +3,6 @@ import javax.swing.JFrame;
 import quick.dbtable.DBTable;
 import javax.swing.JLabel;
 
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,12 +10,10 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.JTextField;
-import javax.swing.ListModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JList;
@@ -42,7 +39,6 @@ public class Inspector extends JFrame {
 		table = t;
 		legajo = l;
 		listaPatentes = new DefaultListModel<String>();
-
 		getContentPane().setLayout(null);
 
 		JLabel lblNewLabel = new JLabel("Ingrese patentes");
@@ -61,6 +57,7 @@ public class Inspector extends JFrame {
 		btnAgregar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				agregarPatente(listaPatentes, patArea.getText());
+
 				patArea.setText("");
 			}
 		});
@@ -101,7 +98,8 @@ public class Inspector extends JFrame {
 		btnMulta.setEnabled(false);
 		btnMulta.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				String[] selected = ((String) comboBox.getSelectedItem()).split("");
+				Fechas f = new Fechas();
+				String[] selected = ((String) comboBox.getSelectedItem()).split(" ");
 				DefaultListModel<String> estacionadas = new DefaultListModel<String>();
 				Connection c = table.getConnection();
 				try {
@@ -115,8 +113,20 @@ public class Inspector extends JFrame {
 					}
 					DefaultListModel<String> patentesInfractoras = patentesMulta(listaPatentes, estacionadas);
 
-					// ya tengo las patentes que no tienen estacionamientos abiertos, tamos listos
-					// para ver si el inspector puede meter mano o no
+					java.util.Date fechaActual = new java.util.Date(System.currentTimeMillis());
+
+					if (checkInspector(selected[0], selected[1], fechaActual)) {
+						rs = st.executeQuery("select id_parq from parquimetros where calle = '" + selected[0]
+								+ "' and altura = '" + selected[1] + "'");
+						rs.next();
+						int id_parq = rs.getInt("id_parq");
+						String fecha = f.convertirDateAString(fechaActual);
+						String hora = fechaActual.getHours() + ":" + fechaActual.getMinutes() + ":"
+								+ fechaActual.getSeconds();
+						rs = st.executeQuery("insert into accede(legajo,id_parq,fecha,hora) values (" + legajo + ","
+								+ id_parq + ",'" + fecha + "','" + hora + "'");
+
+					}
 
 					rs.close();
 					st.close();
@@ -134,6 +144,9 @@ public class Inspector extends JFrame {
 		lblPatentes.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 22));
 		lblPatentes.setBounds(69, 184, 161, 74);
 		getContentPane().add(lblPatentes);
+
+		table.setBounds(315, 245, 637, 305);
+		getContentPane().add(table);
 
 	}
 
@@ -189,9 +202,6 @@ public class Inspector extends JFrame {
 		return false;
 	}
 
-	// te muestra toda la data de la multa que se acaba de hacer. el tema es que
-	// antes de hacer esto, habria que hacer el insert de la multa en la bdd.
-	// ES SOLO UN BOSQUEJO
 	private void labrarMulta(String patente) {
 		Connection c = table.getConnection();
 		try {
@@ -215,5 +225,72 @@ public class Inspector extends JFrame {
 
 		}
 
+	}
+
+	private boolean checkInspector(String calle, String altura, java.util.Date fecha) {
+		Fechas f = new Fechas();
+		String diaActual = null;
+		String turnoActual = null;
+		String dia = null;
+		String turno = null;
+
+		Connection c = table.getConnection();
+		try {
+			Statement st = c.createStatement();
+			ResultSet rs = st.executeQuery("select dia,turno from asociado_con where legajo = '" + legajo
+					+ "' and calle = '" + calle + "' and altura = '" + altura + "'");
+
+			boolean tiene = rs.next();
+			System.out.println("llegue a ejecutar la primera consulta");
+			System.out.println(tiene);
+			dia = rs.getString("dia");// "do"
+			System.out.println(dia);
+			turno = rs.getString("turno");// "t"
+			System.out.println(turno);
+			java.sql.Date fechaSQL = f.convertirDateADateSQL(fecha);
+			rs = st.executeQuery("select dayofweek ('" + fechaSQL + "')");
+			rs.next();
+			int nroDia = rs.getInt("dayofweek ('" + fechaSQL + "')");
+
+			rs.close();
+			st.close();
+			switch (nroDia) {
+			case 1:
+				diaActual = "do";
+				break;
+			case 2:
+				diaActual = "lu";
+				break;
+			case 3:
+				diaActual = "ma";
+				break;
+			case 4:
+				diaActual = "mi";
+				break;
+			case 5:
+				diaActual = "ju";
+				break;
+			case 6:
+				diaActual = "vi";
+				break;
+			case 7:
+				diaActual = "sa";
+				break;
+			}
+			System.out.println("estoy por entrar al if");
+			if (fecha.getHours() <= 13 && fecha.getMinutes() <= 59 && fecha.getHours() >= 8)
+				turnoActual = "m";
+			else if (fecha.getHours() >= 14 && fecha.getHours() <= 20)
+				turnoActual = "t";
+			else
+				JOptionPane.showMessageDialog(getContentPane(), "Está fuera de horario", "FUERA DE HORARIO",
+						JOptionPane.WARNING_MESSAGE);
+			System.out.println("sali del if pa");
+
+		} catch (SQLException e) {
+
+		}
+
+		return dia.equals(diaActual) && turno.equals(turnoActual);
 	}
 }
