@@ -88,6 +88,9 @@ public class Admin extends JFrame {
 
 	}
 
+	/*
+	 * Genera y muestra en la app la lista de tablas de la BD Parquimetros
+	 */
 	private void listarTablas() {
 		DefaultListModel<String> listModel = new DefaultListModel<String>();
 		Connection c = table.getConnection();
@@ -110,6 +113,10 @@ public class Admin extends JFrame {
 		}
 	}
 
+	/*
+	 * Dada la tabla seleccionada en la lista de tablas, muestra sus atributos en la
+	 * app
+	 */
 	private void listarAtributos(String selected) {
 		DefaultListModel<String> listModel = new DefaultListModel<String>();
 		Connection c = table.getConnection();
@@ -132,16 +139,9 @@ public class Admin extends JFrame {
 
 		}
 	}
-
 	/*
-	 * private void desconectarBD() { try { table.close(); } catch (SQLException ex)
-	 * { System.out.println("SQLException: " + ex.getMessage());
-	 * System.out.println("SQLState: " + ex.getSQLState());
-	 * System.out.println("VendorError: " + ex.getErrorCode()); }
 	 * 
-	 * }
 	 */
-
 	private void refrescarTabla() {
 		try {
 			table.setSelectSql(this.textArea.getText().trim());

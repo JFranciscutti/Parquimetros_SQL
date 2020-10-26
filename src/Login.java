@@ -33,10 +33,10 @@ public class Login extends JFrame {
 	private JRadioButton btnAdmin, btnInspec;
 	private JLabel titulo, lblUser, lblPass;
 	private JButton btnLogin;
-	private Admin adm;
-	private Inspector ins;
-	public DBTable table;
-	private String[] datos;
+	private Admin adm; // Ventana administrador
+	private Inspector ins; // Ventana inspector
+	public DBTable table; // Es la tabla que usaremos para la conexion a la BD
+	private String[] datos; // Es para ponerle el nombre del inspector al titulo de su ventana
 
 	public static void main(String args[]) {
 		SwingUtilities.invokeLater(new Runnable() {
@@ -128,6 +128,12 @@ public class Login extends JFrame {
 
 	}
 
+	/*
+	 * Inicializa la base de datos, ingresando como admin o como inspector segun sea
+	 * el usuario. Si es un inspector, se valida que los datos del mismo (legajo y
+	 * password) sean los correctos. Cualquier error es notificado mediante un
+	 * cartel.
+	 */
 	private void conectarBD(String user, String pw) {
 		try {
 			String driver = "com.mysql.cj.jdbc.Driver";
@@ -161,6 +167,10 @@ public class Login extends JFrame {
 		}
 	}
 
+	/*
+	 * Verifica que el legajo (user) y el password (pw) correspondan a un inspector
+	 * de la base de datos.
+	 */
 	private boolean checkInspector(String user, String pw) {
 		boolean salida = true;
 		Connection c = table.getConnection();
@@ -185,6 +195,10 @@ public class Login extends JFrame {
 
 	}
 
+	/*
+	 * Cambia a la ventana de la funcion del administrador y cierra la ventana
+	 * inicial
+	 */
 	private void adminScreen() {
 		adm = new Admin(table);
 		adm.setTitle("Bienvenido administrador - App Parquimetros");
@@ -195,6 +209,9 @@ public class Login extends JFrame {
 		this.dispose();
 	}
 
+	/*
+	 * Cambia a la ventana de la funcion del inspector y cierra la ventana inicial
+	 */
 	private void inspecScreen(String user) {
 		ins = new Inspector(table, user);
 		ins.setTitle("Bienvenido " + datos[0] + " " + datos[1] + " - App Parquimetros");
