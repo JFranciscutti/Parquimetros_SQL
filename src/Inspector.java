@@ -34,17 +34,19 @@ public class Inspector extends JFrame {
 	private JList<String> list;
 	private JComboBox<String> comboBox;
 	private JButton btnMulta;
+	private Fechas f;
 
 	public Inspector(DBTable t, String l) {
 		table = t;
+		table.setEditable(false);
 		legajo = l;
 		listaPatentes = new DefaultListModel<String>();
 		getContentPane().setLayout(null);
 
-		JLabel lblNewLabel = new JLabel("Ingrese patentes");
-		lblNewLabel.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 22));
-		lblNewLabel.setBounds(49, 25, 254, 74);
-		getContentPane().add(lblNewLabel);
+		JLabel lblIngPatente = new JLabel("Ingrese patentes");
+		lblIngPatente.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 22));
+		lblIngPatente.setBounds(49, 25, 254, 74);
+		getContentPane().add(lblIngPatente);
 
 		patArea = new JTextField();
 		patArea.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -98,14 +100,22 @@ public class Inspector extends JFrame {
 		btnMulta.setEnabled(false);
 		btnMulta.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				Fechas f = new Fechas();
-				String[] selected = ((String) comboBox.getSelectedItem()).split(" ");
+				String aux = (String) comboBox.getSelectedItem();
+				String[] calle_altura = aux.split(" ");
+				String calle = "";
+				for (int i = 0; i < calle_altura.length - 1; i++) {
+					calle += calle_altura[i];
+					calle += " ";
+				}
+				calle = calle.substring(0, calle.length() - 1);
+				String altura = calle_altura[calle_altura.length - 1];
+
 				DefaultListModel<String> estacionadas = new DefaultListModel<String>();
 				Connection c = table.getConnection();
 				try {
 					Statement st = c.createStatement();
-					ResultSet rs = st.executeQuery("select patente from estacionados where calle = '" + selected[0]
-							+ "' and altura = '" + selected[1] + "'");
+					ResultSet rs = st.executeQuery("select patente from estacionados where calle = '" + calle
+							+ "' and altura = '" + altura + "'");
 					boolean fin = rs.next();
 					while (fin) {
 						estacionadas.addElement(rs.getString("patente"));
@@ -115,16 +125,26 @@ public class Inspector extends JFrame {
 
 					java.util.Date fechaActual = new java.util.Date(System.currentTimeMillis());
 
-					if (checkInspector(selected[0], selected[1], fechaActual)) {
-						rs = st.executeQuery("select id_parq from parquimetros where calle = '" + selected[0]
-								+ "' and altura = '" + selected[1] + "'");
+					if (checkInspector(calle, altura, fechaActual)) {
+						rs = st.executeQuery("select id_parq from parquimetros where calle = '" + calle
+								+ "' and altura = '" + altura + "'");
 						rs.next();
 						int id_parq = rs.getInt("id_parq");
-						String fecha = f.convertirDateAString(fechaActual);
+						String fecha = f.convertirDateAStringDB(fechaActual);
 						String hora = fechaActual.getHours() + ":" + fechaActual.getMinutes() + ":"
 								+ fechaActual.getSeconds();
-						rs = st.executeQuery("insert into accede(legajo,id_parq,fecha,hora) values (" + legajo + ","
-								+ id_parq + ",'" + fecha + "','" + hora + "'");
+						int insert = st.executeUpdate("insert into accede(legajo,id_parq,fecha,hora) values (" + legajo
+								+ "," + id_parq + ",'" + fecha + "','" + hora + "')");
+
+						for (int i = 0; i < patentesInfractoras.size(); i++) {
+							labrarMulta(patentesInfractoras.elementAt(i), calle, altura, fecha, hora);
+						}
+						table.setSelectSql(
+								"select numero as 'Numero de Multa',fecha,hora,calle,altura,patente,legajo from multa natural join asociado_con");
+						table.createColumnModelFromQuery();
+						table.refresh();
+
+						btnMulta.setEnabled(false);
 
 					}
 
@@ -147,6 +167,12 @@ public class Inspector extends JFrame {
 
 		table.setBounds(315, 245, 637, 305);
 		getContentPane().add(table);
+
+		JLabel lblMultas = new JLabel("Multas");
+		lblMultas.setHorizontalAlignment(SwingConstants.CENTER);
+		lblMultas.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 22));
+		lblMultas.setBounds(280, 184, 161, 74);
+		getContentPane().add(lblMultas);
 
 	}
 
@@ -187,7 +213,7 @@ public class Inspector extends JFrame {
 		DefaultListModel<String> l = new DefaultListModel<String>();
 
 		for (int i = 0; i < ingresadas.size(); i++) {
-			if (esta(ingresadas.getElementAt(i), estacionados))
+			if (!esta(ingresadas.getElementAt(i), estacionados))
 				l.addElement(ingresadas.getElementAt(i));
 		}
 
@@ -202,24 +228,19 @@ public class Inspector extends JFrame {
 		return false;
 	}
 
-	private void labrarMulta(String patente) {
+	private void labrarMulta(String patente, String calle, String altura, String fecha, String hora) {
 		Connection c = table.getConnection();
 		try {
 			Statement st = c.createStatement();
-			ResultSet rs = st.executeQuery(
-					"select numero as 'Numero de Multa',fecha,hora,calle,altura,patente,legajo from multa natural join asociado_con where patente = '"
-							+ patente + "'");
-			boolean fin = rs.next();
-			while (fin) {
-				System.out.println("Multa labrada:");
-				System.out.println("Nro de multa: " + rs.getInt("Numero de Multa"));
-				System.out.println("Fecha: " + rs.getDate("fecha"));
-				System.out.println("Hora: " + rs.getTime("hora"));
-				System.out.println("Calle: " + rs.getString("calle"));
-				System.out.println("Altura: " + rs.getInt("altura"));
-				System.out.println("Patente: " + rs.getString("patente"));
-				System.out.println("Legajo del inspector: " + rs.getString("legajo"));
-			}
+			ResultSet rs = st.executeQuery("select id_asociado_con from asociado_con where legajo = '" + legajo
+					+ "' and calle = '" + calle + "' and altura = " + altura);
+			rs.next();
+			int id = rs.getInt("id_asociado_con");
+			int multa = st.executeUpdate("insert into multa(fecha,hora,patente,id_asociado_con) values ('" + fecha
+					+ "','" + hora + "','" + patente + "'," + id + ")");
+
+			rs.close();
+			st.close();
 
 		} catch (SQLException e) {
 
@@ -228,7 +249,7 @@ public class Inspector extends JFrame {
 	}
 
 	private boolean checkInspector(String calle, String altura, java.util.Date fecha) {
-		Fechas f = new Fechas();
+
 		String diaActual = null;
 		String turnoActual = null;
 		String dia = null;
@@ -241,12 +262,8 @@ public class Inspector extends JFrame {
 					+ "' and calle = '" + calle + "' and altura = '" + altura + "'");
 
 			boolean tiene = rs.next();
-			System.out.println("llegue a ejecutar la primera consulta");
-			System.out.println(tiene);
 			dia = rs.getString("dia");// "do"
-			System.out.println(dia);
 			turno = rs.getString("turno");// "t"
-			System.out.println(turno);
 			java.sql.Date fechaSQL = f.convertirDateADateSQL(fecha);
 			rs = st.executeQuery("select dayofweek ('" + fechaSQL + "')");
 			rs.next();
@@ -277,17 +294,18 @@ public class Inspector extends JFrame {
 				diaActual = "sa";
 				break;
 			}
-			System.out.println("estoy por entrar al if");
-			if (fecha.getHours() <= 13 && fecha.getMinutes() <= 59 && fecha.getHours() >= 8)
+			int hora = fecha.getHours();
+			int minutos = fecha.getMinutes();
+			if (hora >= 8 && hora <= 13 && !(hora == 14 && minutos == 0))
 				turnoActual = "m";
-			else if (fecha.getHours() >= 14 && fecha.getHours() <= 20)
+			else if (hora >= 14 && hora <= 22 && !(hora == 22 && minutos > 0))
 				turnoActual = "t";
 			else
 				JOptionPane.showMessageDialog(getContentPane(), "Está fuera de horario", "FUERA DE HORARIO",
 						JOptionPane.WARNING_MESSAGE);
-			System.out.println("sali del if pa");
 
 		} catch (SQLException e) {
+			System.out.println("le erre en la consulta del checkInspector");
 
 		}
 

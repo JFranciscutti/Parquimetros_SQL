@@ -103,11 +103,6 @@ public class Login extends JFrame {
 		botones.add(btnAdmin);
 		botones.add(btnInspec);
 
-		JLabel lblNewLabel = new JLabel(
-				"Label temporal: \r\n\r\nlegajos: 118524 y 113603 \r\n\r\npasswords: bdd2020 (para ambos legajos)");
-		lblNewLabel.setBounds(23, 11, 531, 63);
-		getContentPane().add(lblNewLabel);
-
 		btnLogin.addActionListener(new ActionListener() {
 			@SuppressWarnings("deprecation")
 			public void actionPerformed(ActionEvent arg0) {
