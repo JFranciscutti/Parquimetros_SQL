@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,7 +35,6 @@ public class Inspector extends JFrame {
 	private JList<String> list;
 	private JComboBox<String> comboBox;
 	private JButton btnMulta;
-	private Fechas f;
 
 	public Inspector(DBTable t, String l) {
 		table = t;
@@ -123,21 +123,22 @@ public class Inspector extends JFrame {
 					}
 					DefaultListModel<String> patentesInfractoras = patentesMulta(listaPatentes, estacionadas);
 
-					java.util.Date fechaActual = new java.util.Date(System.currentTimeMillis());
+					rs = st.executeQuery("select curdate(),curtime()");
+					rs.next();
+					java.sql.Date fechaActual = rs.getDate("curdate()");
+					Time horaActual = rs.getTime("curtime()");
 
-					if (checkInspector(calle, altura, fechaActual)) {
+					if (checkInspector(calle, altura, fechaActual, horaActual)) {
 						rs = st.executeQuery("select id_parq from parquimetros where calle = '" + calle
 								+ "' and altura = '" + altura + "'");
 						rs.next();
 						int id_parq = rs.getInt("id_parq");
-						String fecha = f.convertirDateAStringDB(fechaActual);
-						String hora = fechaActual.getHours() + ":" + fechaActual.getMinutes() + ":"
-								+ fechaActual.getSeconds();
-						int insert = st.executeUpdate("insert into accede(legajo,id_parq,fecha,hora) values (" + legajo
-								+ "," + id_parq + ",'" + fecha + "','" + hora + "')");
+						st.executeUpdate("insert into accede(legajo,id_parq,fecha,hora) values (" + legajo + ","
+								+ id_parq + ",'" + fechaActual + "','" + horaActual.toString() + "')");
 
 						for (int i = 0; i < patentesInfractoras.size(); i++) {
-							labrarMulta(patentesInfractoras.elementAt(i), calle, altura, fecha, hora);
+							labrarMulta(patentesInfractoras.elementAt(i), calle, altura, fechaActual.toString(),
+									horaActual.toString());
 						}
 						table.setSelectSql(
 								"select numero as 'Numero de Multa',fecha,hora,calle,altura,patente,legajo from multa natural join asociado_con");
@@ -236,8 +237,8 @@ public class Inspector extends JFrame {
 					+ "' and calle = '" + calle + "' and altura = " + altura);
 			rs.next();
 			int id = rs.getInt("id_asociado_con");
-			int multa = st.executeUpdate("insert into multa(fecha,hora,patente,id_asociado_con) values ('" + fecha
-					+ "','" + hora + "','" + patente + "'," + id + ")");
+			st.executeUpdate("insert into multa(fecha,hora,patente,id_asociado_con) values ('" + fecha + "','" + hora
+					+ "','" + patente + "'," + id + ")");
 
 			rs.close();
 			st.close();
@@ -248,7 +249,8 @@ public class Inspector extends JFrame {
 
 	}
 
-	private boolean checkInspector(String calle, String altura, java.util.Date fecha) {
+	@SuppressWarnings("deprecation")
+	private boolean checkInspector(String calle, String altura, java.sql.Date fecha, Time hora) {
 
 		String diaActual = null;
 		String turnoActual = null;
@@ -260,14 +262,13 @@ public class Inspector extends JFrame {
 			Statement st = c.createStatement();
 			ResultSet rs = st.executeQuery("select dia,turno from asociado_con where legajo = '" + legajo
 					+ "' and calle = '" + calle + "' and altura = '" + altura + "'");
-
-			boolean tiene = rs.next();
-			dia = rs.getString("dia");// "do"
-			turno = rs.getString("turno");// "t"
-			java.sql.Date fechaSQL = f.convertirDateADateSQL(fecha);
-			rs = st.executeQuery("select dayofweek ('" + fechaSQL + "')");
 			rs.next();
-			int nroDia = rs.getInt("dayofweek ('" + fechaSQL + "')");
+			dia = rs.getString("dia");
+			turno = rs.getString("turno");
+
+			rs = st.executeQuery("select dayofweek ('" + fecha + "')");
+			rs.next();
+			int nroDia = rs.getInt("dayofweek ('" + fecha + "')");
 
 			rs.close();
 			st.close();
@@ -294,11 +295,10 @@ public class Inspector extends JFrame {
 				diaActual = "sa";
 				break;
 			}
-			int hora = fecha.getHours();
-			int minutos = fecha.getMinutes();
-			if (hora >= 8 && hora <= 13 && !(hora == 14 && minutos == 0))
+
+			if (hora.getHours() >= 8 && hora.getHours() <= 13 && !(hora.getHours() == 14 && hora.getMinutes() == 0))
 				turnoActual = "m";
-			else if (hora >= 14 && hora <= 22 && !(hora == 22 && minutos > 0))
+			else if (hora.getHours() >= 14 && hora.getHours() <= 20 && !(hora.getHours() == 20 && hora.getHours() > 0))
 				turnoActual = "t";
 			else
 				JOptionPane.showMessageDialog(getContentPane(), "Está fuera de horario", "FUERA DE HORARIO",
