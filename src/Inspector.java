@@ -34,7 +34,8 @@ public class Inspector extends JFrame {
 	private JTextField patArea;
 	private DefaultListModel<String> listaPatentes;
 	private JList<String> list;
-	private JComboBox<String> comboBox;
+	private JComboBox<String> ubicaciones;
+	private JComboBox<Integer> cbParq;
 	private JButton btnMulta;
 
 	public Inspector(DBTable t, String l) {
@@ -70,7 +71,7 @@ public class Inspector extends JFrame {
 		btnSig.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				btnAgregar.setEnabled(false);
-				comboBox.setEnabled(true);
+				ubicaciones.setEnabled(true);
 				patArea.setText("");
 				patArea.setEnabled(false);
 				ubicaciones();
@@ -86,17 +87,26 @@ public class Inspector extends JFrame {
 
 		JLabel lblSeleccioneUbicacion = new JLabel("Seleccione ubicación");
 		lblSeleccioneUbicacion.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 22));
-		lblSeleccioneUbicacion.setBounds(430, 25, 299, 74);
+		lblSeleccioneUbicacion.setBounds(313, 25, 299, 74);
 		getContentPane().add(lblSeleccioneUbicacion);
 
-		comboBox = new JComboBox<String>();
-		comboBox.setBounds(430, 86, 266, 32);
-		comboBox.setEnabled(false);
+		ubicaciones = new JComboBox<String>();
+		ubicaciones.setBounds(313, 87, 266, 32);
+		ubicaciones.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				String aux = (String) ubicaciones.getSelectedItem();
+				String[] calle_alt = getCalleAltura(aux);
+				cbParq.setEnabled(true);
+				cbParq.removeAllItems();
+				id_parquimetros(calle_alt[0], calle_alt[1]);
+			}
+		});
+		ubicaciones.setEnabled(false);
 
-		getContentPane().add(comboBox);
+		getContentPane().add(ubicaciones);
 
 		btnMulta = new JButton("GENERAR MULTAS");
-		btnMulta.setBounds(430, 164, 266, 39);
+		btnMulta.setBounds(488, 156, 266, 39);
 		btnMulta.setEnabled(false);
 		btnMulta.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -121,6 +131,16 @@ public class Inspector extends JFrame {
 		lblMultas.setBounds(280, 184, 161, 74);
 		getContentPane().add(lblMultas);
 
+		JLabel lblSeleccioneParquimetro = new JLabel("Seleccione parquimetro");
+		lblSeleccioneParquimetro.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 22));
+		lblSeleccioneParquimetro.setBounds(622, 25, 313, 74);
+		getContentPane().add(lblSeleccioneParquimetro);
+
+		cbParq = new JComboBox<Integer>();
+		cbParq.setEnabled(false);
+		cbParq.setBounds(632, 87, 266, 32);
+		getContentPane().add(cbParq);
+
 	}
 
 	/*
@@ -132,8 +152,9 @@ public class Inspector extends JFrame {
 	 * pantalla. Sino, se notifica que no puede.
 	 */
 	private void accionGenerarMulta(ActionEvent arg0) {
-		String aux = (String) comboBox.getSelectedItem();
+		String aux = (String) ubicaciones.getSelectedItem();
 		String[] calle_alt = getCalleAltura(aux);
+		int id_parq = (Integer) cbParq.getSelectedItem();
 		DefaultListModel<String> estacionadas = new DefaultListModel<String>();
 		Connection c = table.getConnection();
 		try {
@@ -151,10 +172,6 @@ public class Inspector extends JFrame {
 			java.sql.Date fechaActual = rs.getDate("curdate()");
 			Time horaActual = rs.getTime("curtime()");
 
-			rs = st.executeQuery("select id_parq from parquimetros where calle = '" + calle_alt[0] + "' and altura = '"
-					+ calle_alt[1] + "'");
-			rs.next();
-			int id_parq = rs.getInt("id_parq");
 			st.executeUpdate("insert into accede(legajo,id_parq,fecha,hora) values (" + legajo + "," + id_parq + ",'"
 					+ fechaActual + "','" + horaActual.toString() + "')");
 
@@ -175,7 +192,6 @@ public class Inspector extends JFrame {
 					}
 				}
 				table.refresh();
-
 				btnMulta.setEnabled(false);
 
 			} else {
@@ -241,8 +257,8 @@ public class Inspector extends JFrame {
 			boolean fin = rs.next();
 			while (fin) {
 				String calle_alt = rs.getString("calle") + " " + rs.getString("altura");
-				if (!ub_repetida(comboBox, calle_alt))
-					comboBox.addItem(calle_alt);
+				if (!ub_repetida(ubicaciones, calle_alt))
+					ubicaciones.addItem(calle_alt);
 				fin = rs.next();
 			}
 
@@ -250,6 +266,27 @@ public class Inspector extends JFrame {
 			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}
+
+	}
+
+	private void id_parquimetros(String calle, String altura) {
+		Connection c = table.getConnection();
+
+		try {
+			Statement st = c.createStatement();
+			ResultSet rs = st.executeQuery(
+					"select id_parq from parquimetros where calle = '" + calle + "' and altura = '" + altura + "'");
+			boolean fin = rs.next();
+			int id_parq;
+			while (fin) {
+				id_parq = rs.getInt("id_parq");
+				cbParq.addItem(id_parq);
+				fin = rs.next();
+			}
+
+		} catch (SQLException e) {
+			System.out.println("error al cargar parquimetros");
 		}
 
 	}
