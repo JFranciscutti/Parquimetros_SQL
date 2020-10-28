@@ -122,7 +122,7 @@ public class Inspector extends JFrame {
 		lblPatentes.setBounds(69, 184, 161, 74);
 		getContentPane().add(lblPatentes);
 
-		table.setBounds(315, 245, 637, 305);
+		table.setBounds(315, 245, 633, 305);
 		getContentPane().add(table);
 
 		JLabel lblMultas = new JLabel("Multas");
@@ -181,7 +181,7 @@ public class Inspector extends JFrame {
 							horaActual.toString());
 				}
 				table.setSelectSql(
-						"select numero as 'Numero de Multa',fecha,hora,calle,altura,patente,legajo from multa natural join asociado_con");
+						"select numero as 'Nro de Multa',fecha as 'Fecha',hora as 'Hora',calle as 'Calle',altura as 'Altura',patente as 'Patente',legajo as 'Legajo' from multa natural join asociado_con");
 				table.createColumnModelFromQuery();
 				for (int i = 0; i < table.getColumnCount(); i++) {
 					if (table.getColumn(i).getType() == Types.TIME) {
@@ -190,7 +190,10 @@ public class Inspector extends JFrame {
 					if (table.getColumn(i).getType() == Types.DATE) {
 						table.getColumn(i).setDateFormat("dd/MM/YYYY");
 					}
+					table.getColumn(i).setPreferredWidth(90);
+					table.getColumn(i).setResizable(false);
 				}
+
 				table.refresh();
 				btnMulta.setEnabled(false);
 
@@ -343,16 +346,36 @@ public class Inspector extends JFrame {
 					+ "' and calle = '" + calle + "' and altura = " + altura);
 			rs.next();
 			int id = rs.getInt("id_asociado_con");
-			st.executeUpdate("insert into multa(fecha,hora,patente,id_asociado_con) values ('" + fecha + "','" + hora
-					+ "','" + patente + "'," + id + ")");
+			if (existePatente(patente))
+				st.executeUpdate("insert into multa(fecha,hora,patente,id_asociado_con) values ('" + fecha + "','"
+						+ hora + "','" + patente + "'," + id + ")");
 
 			rs.close();
 			st.close();
 
 		} catch (SQLException e) {
-
+			System.out.println("flashé en labrar multa");
 		}
 
+	}
+
+	private boolean existePatente(String pat) {
+		Connection c = table.getConnection();
+		boolean encontre = false;
+		try {
+			Statement st = c.createStatement();
+			ResultSet rs = st.executeQuery("select patente from automoviles");
+			boolean fin = rs.next();
+			while (fin && !encontre) {
+				encontre = rs.getString("patente").equals(pat);
+				fin = rs.next();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Flashé en existePatente");
+		}
+
+		return encontre;
 	}
 
 	/*
@@ -413,8 +436,8 @@ public class Inspector extends JFrame {
 
 			if (hora.getHours() >= 8 && hora.getHours() <= 13 && !(hora.getHours() == 14 && hora.getMinutes() == 0))
 				turnoActual = "m";
-			else if (hora.getHours() >= 14 && hora.getHours() <= 20
-					&& !(hora.getHours() == 20 && hora.getMinutes() > 0))
+			else if (hora.getHours() >= 14 && hora.getHours() <= 23
+					&& !(hora.getHours() == 23 && hora.getMinutes() > 0))
 				turnoActual = "t";
 			else {
 				JOptionPane.showMessageDialog(getContentPane(), "Se encuentra fuera de horario", "FUERA DE HORARIO",
