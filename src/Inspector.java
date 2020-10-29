@@ -436,8 +436,8 @@ public class Inspector extends JFrame {
 
 			if (hora.getHours() >= 8 && hora.getHours() <= 13 && !(hora.getHours() == 14 && hora.getMinutes() == 0))
 				turnoActual = "m";
-			else if (hora.getHours() >= 14 && hora.getHours() <= 23
-					&& !(hora.getHours() == 23 && hora.getMinutes() > 0))
+			else if (hora.getHours() >= 14 && hora.getHours() <= 20
+					&& !(hora.getHours() == 20 && hora.getMinutes() > 0))
 				turnoActual = "t";
 			else {
 				JOptionPane.showMessageDialog(getContentPane(), "Se encuentra fuera de horario", "FUERA DE HORARIO",
