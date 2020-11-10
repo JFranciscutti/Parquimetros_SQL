@@ -22,6 +22,9 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JComboBox;
 import javax.swing.SwingConstants;
+import java.awt.Button;
+import javax.swing.ImageIcon;
+import java.awt.Color;
 
 public class Inspector extends JFrame {
 
@@ -30,6 +33,7 @@ public class Inspector extends JFrame {
 	 */
 	private static final long serialVersionUID = 1L;
 	private DBTable table;
+	private Login login;
 	private String legajo;
 	private JTextField patArea;
 	private DefaultListModel<String> listaPatentes;
@@ -38,7 +42,9 @@ public class Inspector extends JFrame {
 	private JComboBox<Integer> cbParq;
 	private JButton btnMulta;
 
-	public Inspector(DBTable t, String l) {
+	public Inspector(Login prev, DBTable t, String l) {
+		getContentPane().setForeground(Color.BLACK);
+		login = prev;
 		table = t;
 		table.setEditable(false);
 		legajo = l;
@@ -47,17 +53,17 @@ public class Inspector extends JFrame {
 
 		JLabel lblIngPatente = new JLabel("Ingrese patentes");
 		lblIngPatente.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 22));
-		lblIngPatente.setBounds(49, 25, 254, 74);
+		lblIngPatente.setBounds(42, 36, 254, 74);
 		getContentPane().add(lblIngPatente);
 
 		patArea = new JTextField();
 		patArea.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		patArea.setBounds(69, 86, 161, 32);
+		patArea.setBounds(69, 121, 161, 32);
 		getContentPane().add(patArea);
 		patArea.setColumns(10);
 
 		JButton btnAgregar = new JButton("AGREGAR");
-		btnAgregar.setBounds(42, 129, 89, 23);
+		btnAgregar.setBounds(42, 164, 89, 23);
 		btnAgregar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				agregarPatente(listaPatentes, patArea.getText());
@@ -67,7 +73,7 @@ public class Inspector extends JFrame {
 		getContentPane().add(btnAgregar);
 
 		JButton btnSig = new JButton("SIGUIENTE");
-		btnSig.setBounds(166, 129, 100, 23);
+		btnSig.setBounds(166, 164, 100, 23);
 		btnSig.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				btnAgregar.setEnabled(false);
@@ -87,11 +93,11 @@ public class Inspector extends JFrame {
 
 		JLabel lblSeleccioneUbicacion = new JLabel("Seleccione ubicación");
 		lblSeleccioneUbicacion.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 22));
-		lblSeleccioneUbicacion.setBounds(313, 25, 299, 74);
+		lblSeleccioneUbicacion.setBounds(313, 36, 299, 74);
 		getContentPane().add(lblSeleccioneUbicacion);
 
 		ubicaciones = new JComboBox<String>();
-		ubicaciones.setBounds(313, 87, 266, 32);
+		ubicaciones.setBounds(313, 122, 266, 32);
 		ubicaciones.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				String aux = (String) ubicaciones.getSelectedItem();
@@ -106,7 +112,7 @@ public class Inspector extends JFrame {
 		getContentPane().add(ubicaciones);
 
 		btnMulta = new JButton("GENERAR MULTAS");
-		btnMulta.setBounds(488, 156, 266, 39);
+		btnMulta.setBounds(488, 167, 266, 39);
 		btnMulta.setEnabled(false);
 		btnMulta.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -133,13 +139,33 @@ public class Inspector extends JFrame {
 
 		JLabel lblSeleccioneParquimetro = new JLabel("Seleccione parquimetro");
 		lblSeleccioneParquimetro.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 22));
-		lblSeleccioneParquimetro.setBounds(622, 25, 313, 74);
+		lblSeleccioneParquimetro.setBounds(622, 36, 313, 74);
 		getContentPane().add(lblSeleccioneParquimetro);
 
 		cbParq = new JComboBox<Integer>();
 		cbParq.setEnabled(false);
-		cbParq.setBounds(632, 87, 266, 32);
+		cbParq.setBounds(622, 122, 266, 32);
 		getContentPane().add(cbParq);
+
+		JButton btnRegresar = new JButton("");
+		btnRegresar.setForeground(Color.BLACK);
+		btnRegresar.setBackground(Color.BLACK);
+		btnRegresar.setIcon(new ImageIcon(
+				Inspector.class.getResource("/com/sun/javafx/scene/control/skin/caspian/fxvk-backspace-button.png")));
+		btnRegresar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				regresarLogin();
+
+			}
+		});
+		btnRegresar.setBounds(10, 11, 35, 23);
+		getContentPane().add(btnRegresar);
+
+		JLabel lblRegresar = new JLabel("Regresar");
+		lblRegresar.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 11));
+		lblRegresar.setHorizontalAlignment(SwingConstants.CENTER);
+		lblRegresar.setBounds(42, 10, 77, 24);
+		getContentPane().add(lblRegresar);
 
 	}
 
@@ -237,7 +263,7 @@ public class Inspector extends JFrame {
 	 * cumplir con el formato <3 letras minusculas><3 numeros>
 	 */
 	private void agregarPatente(DefaultListModel<String> listModel, String pat) {
-		Pattern p = Pattern.compile("[a-z]{3}[0-9]{3}");
+		Pattern p = Pattern.compile("[A-Z]{3}[0-9]{3}");
 		Matcher m = p.matcher(pat);
 		if (m.matches()) {
 			listModel.addElement(pat);
@@ -460,5 +486,22 @@ public class Inspector extends JFrame {
 		}
 
 		return salida1 && salida2;
+	}
+
+	private void regresarLogin() {
+		try {
+			table.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		login = new Login();
+		login.setSize(600, 400);
+		login.setResizable(false);
+		login.setLocationRelativeTo(null);
+		login.setVisible(true);
+		login.setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+		this.dispose();
+
 	}
 }

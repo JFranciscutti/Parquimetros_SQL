@@ -5,9 +5,12 @@ import quick.dbtable.DBTable;
 
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -19,6 +22,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 
@@ -32,10 +36,11 @@ public class Admin extends JFrame {
 	private JList<String> listTablas, listAtributos;
 	private JButton btnEjecutar, btnBorrar;
 	private JLabel lblTablas;
+	private Login login;
 
-	public Admin(DBTable t) {
+	public Admin(Login prev, DBTable t) {
 		table = t;
-
+		login = prev;
 		listAtributos = new JList<String>();
 		listTablas = new JList<String>();
 
@@ -53,7 +58,7 @@ public class Admin extends JFrame {
 		getContentPane().setLayout(null);
 
 		textArea = new JTextArea();
-		textArea.setBounds(100, 0, 500, 70);
+		textArea.setBounds(129, 12, 500, 70);
 		getContentPane().add(textArea);
 
 		table.setEditable(false);
@@ -61,7 +66,7 @@ public class Admin extends JFrame {
 		getContentPane().add(table);
 
 		btnEjecutar = new JButton("Ejecutar");
-		btnEjecutar.setBounds(622, 11, 89, 23);
+		btnEjecutar.setBounds(655, 13, 89, 23);
 		getContentPane().add(btnEjecutar);
 		btnEjecutar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -70,7 +75,7 @@ public class Admin extends JFrame {
 		});
 
 		btnBorrar = new JButton("Borrar");
-		btnBorrar.setBounds(622, 45, 89, 23);
+		btnBorrar.setBounds(655, 47, 89, 23);
 		getContentPane().add(btnBorrar);
 		btnBorrar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -79,12 +84,32 @@ public class Admin extends JFrame {
 		});
 
 		lblTablas = new JLabel("Lista de tablas");
-		lblTablas.setBounds(670, 79, 89, 14);
+		lblTablas.setBounds(678, 81, 89, 14);
 		getContentPane().add(lblTablas);
 
 		JLabel lblNewLabel = new JLabel("Lista de atributos");
 		lblNewLabel.setBounds(834, 79, 103, 14);
 		getContentPane().add(lblNewLabel);
+
+		JButton btnRegresar = new JButton("");
+		btnRegresar.setForeground(Color.BLACK);
+		btnRegresar.setBackground(Color.BLACK);
+		btnRegresar.setIcon(new ImageIcon(
+				Inspector.class.getResource("/com/sun/javafx/scene/control/skin/caspian/fxvk-backspace-button.png")));
+		btnRegresar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				regresarLogin();
+
+			}
+		});
+		btnRegresar.setBounds(10, 11, 35, 23);
+		getContentPane().add(btnRegresar);
+
+		JLabel lblRegresar = new JLabel("Regresar");
+		lblRegresar.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 11));
+		lblRegresar.setHorizontalAlignment(SwingConstants.CENTER);
+		lblRegresar.setBounds(42, 10, 77, 24);
+		getContentPane().add(lblRegresar);
 
 	}
 
@@ -103,7 +128,7 @@ public class Admin extends JFrame {
 				fin = rs.next();
 			}
 			listTablas.setModel(listModel);
-			listTablas.setBounds(622, 100, 162, 272);
+			listTablas.setBounds(638, 100, 162, 272);
 			getContentPane().add(listTablas);
 			rs.close();
 			st.close();
@@ -139,13 +164,21 @@ public class Admin extends JFrame {
 
 		}
 	}
+
 	/*
 	 * 
 	 */
 	private void refrescarTabla() {
 		try {
-			table.setSelectSql(this.textArea.getText().trim());
-			table.createColumnModelFromQuery();
+			String sql = this.textArea.getText();
+			String[] palabras = sql.split(" ");
+			if (palabras[0].toLowerCase().equals("select")) {
+				table.setSelectSql(sql.trim());
+				table.createColumnModelFromQuery();
+			} else {
+				System.out.println("aca irian las consultas con execute()");
+			}
+
 			for (int i = 0; i < table.getColumnCount(); i++) {
 				if (table.getColumn(i).getType() == Types.TIME) {
 					table.getColumn(i).setType(Types.CHAR);
@@ -164,6 +197,23 @@ public class Admin extends JFrame {
 					"Error al ejecutar la consulta.", JOptionPane.ERROR_MESSAGE);
 
 		}
+
+	}
+
+	private void regresarLogin() {
+		try {
+			table.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		login = new Login();
+		login.setSize(600, 400);
+		login.setResizable(false);
+		login.setLocationRelativeTo(null);
+		login.setVisible(true);
+		login.setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+		this.dispose();
 
 	}
 }

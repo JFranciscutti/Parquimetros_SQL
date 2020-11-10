@@ -200,7 +200,7 @@ public class Login extends JFrame {
 	 * inicial
 	 */
 	private void adminScreen() {
-		adm = new Admin(table);
+		adm = new Admin(this, table);
 		adm.setTitle("Bienvenido administrador - App Parquimetros");
 		adm.setSize(1000, 600);
 		adm.setVisible(true);
@@ -213,12 +213,26 @@ public class Login extends JFrame {
 	 * Cambia a la ventana de la funcion del inspector y cierra la ventana inicial
 	 */
 	private void inspecScreen(String user) {
-		ins = new Inspector(table, user);
+		ins = new Inspector(this, table, user);
 		ins.setTitle("Bienvenido " + datos[0] + " " + datos[1] + " - App Parquimetros");
 		ins.setSize(1000, 600);
 		ins.setVisible(true);
 		ins.setLocationRelativeTo(null);
 		ins.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.dispose();
+	}
+
+	public void clear() {
+		user.setText("");
+		password.setText("");
+		btnAdmin.setSelected(true);
+		lblUser.setText("Usuario:");
+		try {
+			table.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		table = new DBTable();
+
 	}
 }
