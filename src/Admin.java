@@ -171,13 +171,14 @@ public class Admin extends JFrame {
 	private void refrescarTabla() {
 		try {
 			String sql = this.textArea.getText();
-			String[] palabras = sql.split(" ");
-			if (palabras[0].toLowerCase().equals("select")) {
-				table.setSelectSql(sql.trim());
-				table.createColumnModelFromQuery();
-			} else {
-				System.out.println("aca irian las consultas con execute()");
-			}
+			Connection c = table.getConnection();
+			Statement st = c.createStatement();
+			st.execute(sql.trim());
+			ResultSet rs = st.getResultSet();
+			if (rs.next())
+				table.refresh(rs);
+			else
+				table.refresh();
 
 			for (int i = 0; i < table.getColumnCount(); i++) {
 				if (table.getColumn(i).getType() == Types.TIME) {
@@ -187,7 +188,6 @@ public class Admin extends JFrame {
 					table.getColumn(i).setDateFormat("dd/MM/YYYY");
 				}
 			}
-			table.refresh();
 
 		} catch (SQLException ex) {
 			System.out.println("SQLException: " + ex.getMessage());

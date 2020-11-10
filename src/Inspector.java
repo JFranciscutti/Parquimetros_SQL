@@ -207,7 +207,8 @@ public class Inspector extends JFrame {
 							horaActual.toString());
 				}
 				table.setSelectSql(
-						"select numero as 'Nro de Multa',fecha as 'Fecha',hora as 'Hora',calle as 'Calle',altura as 'Altura',patente as 'Patente',legajo as 'Legajo' from multa natural join asociado_con");
+						"select numero as 'Nro de Multa',fecha as 'Fecha',hora as 'Hora',calle as 'Calle',altura as 'Altura',patente as 'Patente',legajo as 'Legajo' from multa natural join asociado_con where fecha = curdate() and legajo = '"
+								+ legajo + "' order by patente");
 				table.createColumnModelFromQuery();
 				for (int i = 0; i < table.getColumnCount(); i++) {
 					if (table.getColumn(i).getType() == Types.TIME) {
