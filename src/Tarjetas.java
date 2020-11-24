@@ -94,7 +94,7 @@ public class Tarjetas extends JFrame {
 		lblTarjetas.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 16));
 		lblTarjetas.setBounds(114, 158, 240, 20);
 		getContentPane().add(lblTarjetas);
-		
+
 		btnNewButton = new JButton("Acceder");
 		btnNewButton.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 11));
 		btnNewButton.setBounds(364, 216, 319, 23);
@@ -113,8 +113,7 @@ public class Tarjetas extends JFrame {
 			boolean fin = rs.next();
 			while (fin) {
 				String calle_alt = rs.getString("calle") + " " + rs.getString("altura");
-				if (!ub_repetida(ubicaciones, calle_alt))
-					ubicaciones.addItem(calle_alt);
+				ubicaciones.addItem(calle_alt);
 				fin = rs.next();
 			}
 
@@ -182,15 +181,6 @@ public class Tarjetas extends JFrame {
 		String altura = calle_altura[calle_altura.length - 1];
 		salida[0] = calle;
 		salida[1] = altura;
-		return salida;
-	}
-
-	private boolean ub_repetida(JComboBox<String> cb, String calle_alt) {
-		boolean salida = false;
-
-		for (int i = 0; i < cb.getItemCount(); i++)
-			if (cb.getItemAt(i).equals(calle_alt))
-				salida = true;
 		return salida;
 	}
 
