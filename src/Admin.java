@@ -34,8 +34,8 @@ public class Admin extends JFrame {
 	private DBTable table;
 	private JTextArea textArea;
 	private JList<String> listTablas, listAtributos;
-	private JButton btnEjecutar, btnBorrar;
-	private JLabel lblTablas;
+	private JButton btnEjecutar, btnBorrar, btnRegresar;
+	private JLabel lblTablas, lblRegresar, lblAtributos;
 	private Login login;
 
 	public Admin(Login prev, DBTable t) {
@@ -87,15 +87,15 @@ public class Admin extends JFrame {
 		lblTablas.setBounds(678, 81, 89, 14);
 		getContentPane().add(lblTablas);
 
-		JLabel lblNewLabel = new JLabel("Lista de atributos");
-		lblNewLabel.setBounds(834, 79, 103, 14);
-		getContentPane().add(lblNewLabel);
+		lblAtributos = new JLabel("Lista de atributos");
+		lblAtributos.setBounds(834, 79, 103, 14);
+		getContentPane().add(lblAtributos);
 
-		JButton btnRegresar = new JButton("");
+		btnRegresar = new JButton("");
 		btnRegresar.setForeground(Color.BLACK);
 		btnRegresar.setBackground(Color.BLACK);
 		btnRegresar.setIcon(new ImageIcon(
-				Inspector.class.getResource("/com/sun/javafx/scene/control/skin/caspian/fxvk-backspace-button.png")));
+				Admin.class.getResource("/com/sun/javafx/scene/control/skin/caspian/fxvk-backspace-button.png")));
 		btnRegresar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				regresarLogin();
@@ -105,7 +105,7 @@ public class Admin extends JFrame {
 		btnRegresar.setBounds(10, 11, 35, 23);
 		getContentPane().add(btnRegresar);
 
-		JLabel lblRegresar = new JLabel("Regresar");
+		lblRegresar = new JLabel("Regresar");
 		lblRegresar.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 11));
 		lblRegresar.setHorizontalAlignment(SwingConstants.CENTER);
 		lblRegresar.setBounds(42, 10, 77, 24);

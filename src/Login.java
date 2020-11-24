@@ -30,11 +30,12 @@ public class Login extends JFrame {
 	private JTextField user;
 	private JPasswordField password;
 	private ButtonGroup botones;
-	private JRadioButton btnAdmin, btnInspec;
+	private JRadioButton btnAdmin, btnInspec, btnTarjeta;
 	private JLabel titulo, lblUser, lblPass;
 	private JButton btnLogin;
 	private Admin adm; // Ventana administrador
 	private Inspector ins; // Ventana inspector
+	private Tarjetas tar; // Ventana tarjetas
 	public DBTable table; // Es la tabla que usaremos para la conexion a la BD
 	private String[] datos; // Es para ponerle el nombre del inspector al titulo de su ventana
 
@@ -91,17 +92,23 @@ public class Login extends JFrame {
 
 		btnAdmin = new JRadioButton("Ingreso como administrador", true);
 		btnAdmin.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 11));
-		btnAdmin.setBounds(232, 273, 284, 23);
+		btnAdmin.setBounds(232, 254, 284, 23);
 		getContentPane().add(btnAdmin);
 
 		btnInspec = new JRadioButton("Ingreso como inspector", false);
 		btnInspec.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 11));
-		btnInspec.setBounds(232, 313, 222, 23);
+		btnInspec.setBounds(232, 282, 222, 23);
 		getContentPane().add(btnInspec);
+
+		btnTarjeta = new JRadioButton("Conexion de tarjeta", false);
+		btnTarjeta.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 11));
+		btnTarjeta.setBounds(232, 308, 222, 23);
+		getContentPane().add(btnTarjeta);
 
 		botones = new ButtonGroup();
 		botones.add(btnAdmin);
 		botones.add(btnInspec);
+		botones.add(btnTarjeta);
 
 		btnLogin.addActionListener(new ActionListener() {
 			@SuppressWarnings("deprecation")
@@ -151,6 +158,9 @@ public class Login extends JFrame {
 					JOptionPane.showMessageDialog(getContentPane(), "Legajo o contraseña incorrectos", "ERROR",
 							JOptionPane.WARNING_MESSAGE);
 
+			} else if (btnTarjeta.isSelected() && user.equals("parquimetro") && pw.equals("parq")) {
+				table.connectDatabase(driver, url, user, pw);
+				tarjetaScreen();
 			} else {
 				JOptionPane.showMessageDialog(getContentPane(), "Usuario incorrecto. Intente nuevamente.", "ERROR",
 						JOptionPane.WARNING_MESSAGE);
@@ -222,6 +232,15 @@ public class Login extends JFrame {
 		this.dispose();
 	}
 
+	private void tarjetaScreen() {
+		tar = new Tarjetas(this, table);
+		tar.setSize(1000, 600);
+		tar.setVisible(true);
+		tar.setLocationRelativeTo(null);
+		tar.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.dispose();
+	}
+
 	public void clear() {
 		user.setText("");
 		password.setText("");
@@ -235,4 +254,5 @@ public class Login extends JFrame {
 		table = new DBTable();
 
 	}
+
 }

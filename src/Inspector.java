@@ -22,7 +22,6 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JComboBox;
 import javax.swing.SwingConstants;
-import java.awt.Button;
 import javax.swing.ImageIcon;
 import java.awt.Color;
 
@@ -40,7 +39,8 @@ public class Inspector extends JFrame {
 	private JList<String> list;
 	private JComboBox<String> ubicaciones;
 	private JComboBox<Integer> cbParq;
-	private JButton btnMulta;
+	private JButton btnMulta, btnRegresar, btnAgregar, btnSig;
+	private JLabel lblIngPatente, lblSeleccioneUbicacion, lblMultas, lblPatentes, lblSeleccioneParquimetro, lblRegresar;
 
 	public Inspector(Login prev, DBTable t, String l) {
 		getContentPane().setForeground(Color.BLACK);
@@ -51,7 +51,7 @@ public class Inspector extends JFrame {
 		listaPatentes = new DefaultListModel<String>();
 		getContentPane().setLayout(null);
 
-		JLabel lblIngPatente = new JLabel("Ingrese patentes");
+		lblIngPatente = new JLabel("Ingrese patentes");
 		lblIngPatente.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 22));
 		lblIngPatente.setBounds(42, 36, 254, 74);
 		getContentPane().add(lblIngPatente);
@@ -62,7 +62,7 @@ public class Inspector extends JFrame {
 		getContentPane().add(patArea);
 		patArea.setColumns(10);
 
-		JButton btnAgregar = new JButton("AGREGAR");
+		btnAgregar = new JButton("AGREGAR");
 		btnAgregar.setBounds(42, 164, 89, 23);
 		btnAgregar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -72,7 +72,7 @@ public class Inspector extends JFrame {
 		});
 		getContentPane().add(btnAgregar);
 
-		JButton btnSig = new JButton("SIGUIENTE");
+		btnSig = new JButton("SIGUIENTE");
 		btnSig.setBounds(166, 164, 100, 23);
 		btnSig.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -91,7 +91,7 @@ public class Inspector extends JFrame {
 		list.setBounds(42, 245, 224, 305);
 		getContentPane().add(list);
 
-		JLabel lblSeleccioneUbicacion = new JLabel("Seleccione ubicación");
+		lblSeleccioneUbicacion = new JLabel("Seleccione ubicación");
 		lblSeleccioneUbicacion.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 22));
 		lblSeleccioneUbicacion.setBounds(313, 36, 299, 74);
 		getContentPane().add(lblSeleccioneUbicacion);
@@ -122,7 +122,7 @@ public class Inspector extends JFrame {
 		});
 		getContentPane().add(btnMulta);
 
-		JLabel lblPatentes = new JLabel("Patentes");
+		lblPatentes = new JLabel("Patentes");
 		lblPatentes.setHorizontalAlignment(SwingConstants.CENTER);
 		lblPatentes.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 22));
 		lblPatentes.setBounds(69, 184, 161, 74);
@@ -131,13 +131,13 @@ public class Inspector extends JFrame {
 		table.setBounds(315, 245, 633, 305);
 		getContentPane().add(table);
 
-		JLabel lblMultas = new JLabel("Multas");
+		lblMultas = new JLabel("Multas");
 		lblMultas.setHorizontalAlignment(SwingConstants.CENTER);
 		lblMultas.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 22));
 		lblMultas.setBounds(280, 184, 161, 74);
 		getContentPane().add(lblMultas);
 
-		JLabel lblSeleccioneParquimetro = new JLabel("Seleccione parquimetro");
+		lblSeleccioneParquimetro = new JLabel("Seleccione parquimetro");
 		lblSeleccioneParquimetro.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 22));
 		lblSeleccioneParquimetro.setBounds(622, 36, 313, 74);
 		getContentPane().add(lblSeleccioneParquimetro);
@@ -147,7 +147,7 @@ public class Inspector extends JFrame {
 		cbParq.setBounds(622, 122, 266, 32);
 		getContentPane().add(cbParq);
 
-		JButton btnRegresar = new JButton("");
+		btnRegresar = new JButton("");
 		btnRegresar.setForeground(Color.BLACK);
 		btnRegresar.setBackground(Color.BLACK);
 		btnRegresar.setIcon(new ImageIcon(
@@ -161,7 +161,7 @@ public class Inspector extends JFrame {
 		btnRegresar.setBounds(10, 11, 35, 23);
 		getContentPane().add(btnRegresar);
 
-		JLabel lblRegresar = new JLabel("Regresar");
+		lblRegresar = new JLabel("Regresar");
 		lblRegresar.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 11));
 		lblRegresar.setHorizontalAlignment(SwingConstants.CENTER);
 		lblRegresar.setBounds(42, 10, 77, 24);
@@ -207,8 +207,8 @@ public class Inspector extends JFrame {
 							horaActual.toString());
 				}
 				table.setSelectSql(
-						"select numero as 'Nro de Multa',fecha as 'Fecha',hora as 'Hora',calle as 'Calle',altura as 'Altura',patente as 'Patente',legajo as 'Legajo' from multa natural join asociado_con where fecha = curdate() and legajo = '"
-								+ legajo + "' order by patente");
+						"select numero as 'Nro de Multa',fecha as 'Fecha',hora as 'Hora',calle as 'Calle',altura as 'Altura',patente as 'Patente',legajo as 'Legajo' from multa natural join asociado_con where fecha = curdate() and hora = '"
+								+ horaActual + "' and legajo = '" + legajo + "' order by patente");
 				table.createColumnModelFromQuery();
 				for (int i = 0; i < table.getColumnCount(); i++) {
 					if (table.getColumn(i).getType() == Types.TIME) {
