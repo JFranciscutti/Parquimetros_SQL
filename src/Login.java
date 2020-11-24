@@ -30,14 +30,19 @@ public class Login extends JFrame {
 	private JTextField user;
 	private JPasswordField password;
 	private ButtonGroup botones;
-	private JRadioButton btnAdmin, btnInspec, btnTarjeta;
+	private JRadioButton btnAdmin, btnInspec;
 	private JLabel titulo, lblUser, lblPass;
-	private JButton btnLogin;
+	private JButton btnLogin, btnTarjeta;
 	private Admin adm; // Ventana administrador
 	private Inspector ins; // Ventana inspector
 	private Tarjetas tar; // Ventana tarjetas
 	public DBTable table; // Es la tabla que usaremos para la conexion a la BD
 	private String[] datos; // Es para ponerle el nombre del inspector al titulo de su ventana
+
+	private String driver = "com.mysql.cj.jdbc.Driver";
+	private String server = "localhost:3306";
+	private String bdd = "parquimetros";
+	private String url = "jdbc:mysql://" + server + "/" + bdd + "?serverTimezone=America/Argentina/Buenos_Aires";
 
 	public static void main(String args[]) {
 		SwingUtilities.invokeLater(new Runnable() {
@@ -100,15 +105,25 @@ public class Login extends JFrame {
 		btnInspec.setBounds(232, 282, 222, 23);
 		getContentPane().add(btnInspec);
 
-		btnTarjeta = new JRadioButton("Conexion de tarjeta", false);
+		btnTarjeta = new JButton("Conexion de tarjeta");
 		btnTarjeta.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 11));
-		btnTarjeta.setBounds(232, 308, 222, 23);
+		btnTarjeta.setBounds(211, 313, 182, 23);
+		btnTarjeta.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+					table.connectDatabase(driver, url, "parquimetro", "parq");
+				} catch (ClassNotFoundException | SQLException e) {
+					JOptionPane.showMessageDialog(getContentPane(), "No fue posible conectarse a la base de datos.",
+							"ERROR", JOptionPane.WARNING_MESSAGE);
+				}
+				tarjetaScreen();
+			}
+		});
 		getContentPane().add(btnTarjeta);
 
 		botones = new ButtonGroup();
 		botones.add(btnAdmin);
 		botones.add(btnInspec);
-		botones.add(btnTarjeta);
 
 		btnLogin.addActionListener(new ActionListener() {
 			@SuppressWarnings("deprecation")
@@ -143,10 +158,6 @@ public class Login extends JFrame {
 	 */
 	private void conectarBD(String user, String pw) {
 		try {
-			String driver = "com.mysql.cj.jdbc.Driver";
-			String server = "localhost:3306";
-			String bdd = "parquimetros";
-			String url = "jdbc:mysql://" + server + "/" + bdd + "?serverTimezone=America/Argentina/Buenos_Aires";
 			if (btnAdmin.isSelected() && user.equals("admin")) {
 				table.connectDatabase(driver, url, user, pw);
 				adminScreen();
@@ -158,9 +169,6 @@ public class Login extends JFrame {
 					JOptionPane.showMessageDialog(getContentPane(), "Legajo o contraseña incorrectos", "ERROR",
 							JOptionPane.WARNING_MESSAGE);
 
-			} else if (btnTarjeta.isSelected() && user.equals("parquimetro") && pw.equals("parq")) {
-				table.connectDatabase(driver, url, user, pw);
-				tarjetaScreen();
 			} else {
 				JOptionPane.showMessageDialog(getContentPane(), "Usuario incorrecto. Intente nuevamente.", "ERROR",
 						JOptionPane.WARNING_MESSAGE);
