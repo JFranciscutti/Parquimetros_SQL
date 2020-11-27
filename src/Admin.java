@@ -175,10 +175,13 @@ public class Admin extends JFrame {
 			Statement st = c.createStatement();
 			st.execute(sql.trim());
 			ResultSet rs = st.getResultSet();
-			if (rs.next())
+			if (rs != null && rs.next()) {
 				table.refresh(rs);
-			else
+			} else if (rs != null) {
 				table.refresh();
+			} else {
+				JOptionPane.showMessageDialog(null, "Operacion realizada con éxito");
+			}
 
 			for (int i = 0; i < table.getColumnCount(); i++) {
 				if (table.getColumn(i).getType() == Types.TIME) {
@@ -190,12 +193,8 @@ public class Admin extends JFrame {
 			}
 
 		} catch (SQLException ex) {
-			System.out.println("SQLException: " + ex.getMessage());
-			System.out.println("SQLState: " + ex.getSQLState());
-			System.out.println("VendorError: " + ex.getErrorCode());
 			JOptionPane.showMessageDialog(SwingUtilities.getWindowAncestor(this), ex.getMessage() + "\n",
 					"Error al ejecutar la consulta.", JOptionPane.ERROR_MESSAGE);
-
 		}
 
 	}

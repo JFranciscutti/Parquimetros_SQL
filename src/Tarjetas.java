@@ -6,11 +6,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 
 import quick.dbtable.DBTable;
@@ -26,9 +26,11 @@ public class Tarjetas extends JFrame {
 	private Login login;
 	private JButton btnRegresar;
 	private JLabel lblRegresar, lblUbicaciones, lblParquimetros, lblTarjetas;
-	private JComboBox<String> tarjetas, ubicaciones;
-	private JComboBox<Integer> parquimetros;
-	private JButton btnNewButton;
+	private JComboBox<String> ubicaciones;
+	private JComboBox<Integer> tarjetas, parquimetros;
+	private JButton btnAcceder;
+
+	private int parq_actual, id_tarjeta_actual;
 
 	public Tarjetas(Login prev, DBTable t) {
 		table = t;
@@ -76,7 +78,7 @@ public class Tarjetas extends JFrame {
 		parquimetros.setEnabled(false);
 		getContentPane().add(parquimetros);
 
-		tarjetas = new JComboBox<String>();
+		tarjetas = new JComboBox<Integer>();
 		tarjetas.setBounds(364, 160, 319, 20);
 		getContentPane().add(tarjetas);
 
@@ -95,10 +97,29 @@ public class Tarjetas extends JFrame {
 		lblTarjetas.setBounds(114, 158, 240, 20);
 		getContentPane().add(lblTarjetas);
 
-		btnNewButton = new JButton("Acceder");
-		btnNewButton.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 11));
-		btnNewButton.setBounds(364, 216, 319, 23);
-		getContentPane().add(btnNewButton);
+		btnAcceder = new JButton("Acceder");
+		btnAcceder.setFont(new Font("Copperplate Gothic Bold", Font.PLAIN, 11));
+		btnAcceder.setBounds(364, 216, 319, 23);
+		btnAcceder.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				parq_actual = (Integer) parquimetros.getSelectedItem();
+				id_tarjeta_actual = (Integer) tarjetas.getSelectedItem();
+				Connection c = table.getConnection();
+				try {
+					Statement st = c.createStatement();
+					ResultSet rs = st.executeQuery("call conectar(" + id_tarjeta_actual + ", " + parq_actual + ")");
+					table.refresh(rs);
+					for (int i = 0; i < table.getColumnCount(); i++) {
+						table.getColumn(i).setPreferredWidth(310);
+					}
+
+				} catch (SQLException e) {
+					JOptionPane.showMessageDialog(getContentPane(), "Error al ejecutar el stored procedure", "ERROR",
+							JOptionPane.WARNING_MESSAGE);
+				}
+			}
+		});
+		getContentPane().add(btnAcceder);
 
 		cargarUbicaciones();
 		cargarTarjetas();
@@ -157,7 +178,7 @@ public class Tarjetas extends JFrame {
 			ResultSet rs = st.executeQuery("select id_tarjeta,patente from tarjetas");
 			boolean fin = rs.next();
 			while (fin) {
-				tarjetas.addItem(rs.getString("id_tarjeta") + " - " + rs.getString("patente"));
+				tarjetas.addItem(rs.getInt("id_tarjeta"));
 				fin = rs.next();
 			}
 			rs.close();
