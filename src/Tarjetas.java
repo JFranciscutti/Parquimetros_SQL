@@ -12,7 +12,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
-
 import quick.dbtable.DBTable;
 import javax.swing.JComboBox;
 
