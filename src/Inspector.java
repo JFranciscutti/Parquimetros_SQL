@@ -22,7 +22,6 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JComboBox;
 import javax.swing.SwingConstants;
-import javax.swing.ImageIcon;
 import java.awt.Color;
 
 public class Inspector extends JFrame {
@@ -148,10 +147,6 @@ public class Inspector extends JFrame {
 		getContentPane().add(cbParq);
 
 		btnRegresar = new JButton("");
-		btnRegresar.setForeground(Color.BLACK);
-		btnRegresar.setBackground(Color.BLACK);
-		btnRegresar.setIcon(new ImageIcon(
-				Inspector.class.getResource("/com/sun/javafx/scene/control/skin/caspian/fxvk-backspace-button.png")));
 		btnRegresar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				regresarLogin();

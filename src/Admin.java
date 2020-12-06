@@ -9,7 +9,6 @@ import javax.swing.SwingConstants;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,7 +21,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 
@@ -92,10 +90,6 @@ public class Admin extends JFrame {
 		getContentPane().add(lblAtributos);
 
 		btnRegresar = new JButton("");
-		btnRegresar.setForeground(Color.BLACK);
-		btnRegresar.setBackground(Color.BLACK);
-		btnRegresar.setIcon(new ImageIcon(
-				Admin.class.getResource("/com/sun/javafx/scene/control/skin/caspian/fxvk-backspace-button.png")));
 		btnRegresar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				regresarLogin();

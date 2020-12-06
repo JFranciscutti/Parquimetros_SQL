@@ -1,4 +1,3 @@
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -6,7 +5,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -41,10 +39,6 @@ public class Tarjetas extends JFrame {
 		getContentPane().add(table);
 
 		btnRegresar = new JButton("");
-		btnRegresar.setForeground(Color.BLACK);
-		btnRegresar.setBackground(Color.BLACK);
-		btnRegresar.setIcon(new ImageIcon(
-				Tarjetas.class.getResource("/com/sun/javafx/scene/control/skin/caspian/fxvk-backspace-button.png")));
 		btnRegresar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				regresarLogin();
